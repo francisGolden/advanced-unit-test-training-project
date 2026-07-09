@@ -7,6 +7,7 @@ import lv.bootcamp.shelter.service.AnimalService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -34,27 +35,30 @@ class AnimalPageControllerTest {
     private AnimalService animalService;
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void listAnimals_shouldRenderAnimalsView() throws Exception {
-        // TODO:
-        // 1. Stub animalService.findAll() to return an empty list
-        // 2. GET /animals
-        // 3. Assert status 200 and view name "animals"
+        when(animalService.findAll()).thenReturn(List.of());
+        mockMvc.perform(get("/animals"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("animals"));
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void listAnimals_shouldAddAnimalsToModel() throws Exception {
-        // TODO:
-        // 1. Stub animalService.findAll() to return a list with one animal (name="Rex")
-        // 2. GET /animals
-        // 3. Assert the model has an attribute named "animals" containing that list
+        AnimalResponse rex = new AnimalResponse(1L, "Rex", AnimalType.DOG, "Siamese", 2, "Calm", AnimalStatus.AVAILABLE);
+        when(animalService.findAll()).thenReturn(List.of(rex));
+        mockMvc.perform(get("/animals"))
+                .andExpect(model().attribute("animals", List.of(rex)));
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void listAnimals_shouldRenderAnimalNameInHtml() throws Exception {
-        // TODO:
-        // 1. Stub animalService.findAll() to return a list with one animal (name="Rex")
-        // 2. GET /animals
-        // 3. Assert the response body (rendered HTML) contains the string "Rex"
-        //    Hint: content().string(containsString("Rex"))
+        AnimalResponse rex = new AnimalResponse(1L, "Rex", AnimalType.DOG, "Siamese", 2, "Calm", AnimalStatus.AVAILABLE);
+        when(animalService.findAll()).thenReturn(List.of(rex));
+        mockMvc.perform(get("/animals"))
+                .andExpect(content().string(containsString("Rex")));
+
     }
 }

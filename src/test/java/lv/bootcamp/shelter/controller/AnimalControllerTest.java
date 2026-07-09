@@ -10,6 +10,7 @@ import lv.bootcamp.shelter.service.AnimalService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -18,8 +19,8 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
@@ -41,41 +42,83 @@ class AnimalControllerTest {
     private AnimalService animalService;
 
     @Test
+    @WithMockUser(roles = "USER")
     void findAll_shouldReturnListOfAnimals() throws Exception {
-        // TODO:
-        // 1. Stub animalService.findAll() to return a list of two AnimalResponse objects
-        // 2. GET /api/animals
-        // 3. Assert status 200, JSON array length 2, and the names of both animals
+        AnimalResponse milo = new AnimalResponse(1L, "Milo", AnimalType.CAT, "Siamese", 2, "Calm", AnimalStatus.AVAILABLE);
+        AnimalResponse diora = new AnimalResponse(2L, "Diora", AnimalType.DOG, "Cane Corso", 4, "Energetic", AnimalStatus.ADOPTED);
+        when(animalService.findAll()).thenReturn(List.of(milo, diora));
+        mockMvc.perform(get("/api/animals")).andExpect(status().isOk())
+                        .andExpect(jsonPath("$.length()").value(2))
+                        .andExpect(jsonPath("$[0].name").value("Milo"))
+                        .andExpect(jsonPath("$[1].name").value("Diora"));
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     void findById_shouldReturn404WhenNotFound() throws Exception {
-        // TODO:
-        // 1. Stub animalService.findById(99L) to throw AnimalNotFoundException
-        // 2. GET /api/animals/99
-        // 3. Assert status 404
+        when(animalService.findById(99L)).thenThrow((AnimalNotFoundException.class));
+        mockMvc.perform(get("/api/animals/99")).andExpect(status().isNotFound());
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void create_shouldReturn201WithCreatedAnimal() throws Exception {
-        // TODO:
-        // 1. Stub animalService.create(any()) to return an AnimalResponse with id=1, name="Rex", status=AVAILABLE
-        // 2. POST /api/animals with a valid AnimalCreateRequest JSON body
-        // 3. Assert status 201 and that the response JSON contains id, name, and status
+        when(animalService.create(any()))
+                .thenReturn(
+                new AnimalResponse(1L, "Rex", AnimalType.DOG, "Golden Retriever", 3, "Friendly and energetic",
+                        AnimalStatus.AVAILABLE)
+        );
+
+        AnimalCreateRequest animalCreateRequest = new AnimalCreateRequest(
+                "Rex",
+                AnimalType.DOG,
+                "Golden Retriever",
+                3,
+                "Friendly and energetic"
+        );
+
+        mockMvc.perform(post("/api/animals")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(animalCreateRequest)))
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.id").value(1))
+                        .andExpect(jsonPath("$.name").value("Rex"))
+                        .andExpect(jsonPath("$.status").value("AVAILABLE"));
+
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void create_shouldReturn400WhenNameIsBlank() throws Exception {
-        // TODO:
-        // 1. POST /api/animals with a request where name is blank ("")
-        // 2. Assert status 400
-        // (no stub needed — validation rejects the request before the service is called)
+        AnimalCreateRequest animalCreateRequest = new AnimalCreateRequest(
+                "",
+                AnimalType.DOG,
+                "Golden Retriever",
+                3,
+                "Friendly and energetic"
+        );
+        mockMvc.perform(post("/api/animals")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(animalCreateRequest)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void create_shouldReturn400WhenTypeIsNull() throws Exception {
-        // TODO:
-        // 1. POST /api/animals with a JSON body where "type" is null
-        // 2. Assert status 400
+        AnimalCreateRequest animalCreateRequest = new AnimalCreateRequest(
+                "Rex",
+                null,
+                "Golden Retriever",
+                3,
+                "Friendly and energetic"
+        );
+        mockMvc.perform(post("/api/animals")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(animalCreateRequest)))
+                        .andExpect(status().isBadRequest());
     }
 }
