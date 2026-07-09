@@ -33,39 +33,14 @@ class AnimalRepositoryTest {
 
     @Test
     void save_shouldPersistAnimalAndGenerateId() {
-        // TODO:
-        // 1. Create an Animal with id=null
-        // 2. Call animalRepository.save()
-        // 3. Assert the returned animal has a non-null id and the correct name
-        // PREPARATION (The Mockito Stubbing)
-        // We create a "saved" version of the animal to simulate the database generating an ID
-
         Animal animalToSave = new Animal(
-                null,
-                "Rex",
-                AnimalType.DOG,
-                "Labrador",
-                3,
-                "Friendly dog",
-                AnimalStatus.AVAILABLE
+                null, "Rex", AnimalType.DOG, "Labrador", 3,
+                "Friendly dog", AnimalStatus.AVAILABLE
         );
-
-        Animal savedAnimal = new Animal(
-                1L,
-                "Rex",
-                AnimalType.DOG,
-                "Labrador",
-                3,
-                "Friendly dog",
-                AnimalStatus.AVAILABLE
-        );
-
-        when(animalRepository.save(any(Animal.class))).thenReturn(savedAnimal);
 
         Animal result = animalRepository.save(animalToSave);
 
         assertThat(result.getId()).isNotNull();
-        assertThat(result.getId()).isEqualTo(1L);
         assertThat(result.getName()).isEqualTo("Rex");
     }
 
