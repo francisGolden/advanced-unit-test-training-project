@@ -4,6 +4,7 @@ import lv.bootcamp.shelter.client.NotificationClient;
 import lv.bootcamp.shelter.dto.AdoptionRequest;
 import lv.bootcamp.shelter.dto.AnimalCreateRequest;
 import lv.bootcamp.shelter.dto.AnimalResponse;
+import lv.bootcamp.shelter.model.Animal;
 import lv.bootcamp.shelter.model.AnimalStatus;
 import lv.bootcamp.shelter.model.AnimalType;
 import lv.bootcamp.shelter.service.AnimalService;
@@ -12,6 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 // TODO: add imports as you write the test (e.g. assertThat, verify)
 
@@ -34,12 +39,18 @@ class AdoptionIntegrationTest {
 
     @Test
     void adoptionFlow_shouldPersistStatusAndNotifyExternalSystem() {
-        // TODO:
-        // 1. Create a new animal via animalService.create() — assert status is AVAILABLE
-        // 2. Adopt it via animalService.adopt() with an email address
-        // 3. Assert the returned response has status ADOPTED
-        // 4. Verify notificationClient.sendAdoptionNotification() was called
-        //    with the correct animalId, name, and email
-        // 5. Re-fetch the animal via animalService.findById() and assert it is still ADOPTED
+        AnimalCreateRequest request = new AnimalCreateRequest("Millie", AnimalType.CAT, "Siamese", 2, "Nice cat.");
+        AnimalResponse animalResponse = animalService.create(request);
+        assertThat(animalResponse.status()).isEqualTo(AnimalStatus.AVAILABLE);
+        AdoptionRequest adoptionRequest = new AdoptionRequest(
+                1L,
+                "John Doe",
+                "john.doe@email.com"
+        );
+        AnimalResponse response = animalService.adopt(adoptionRequest);
+        assertThat(response.status()).isEqualTo(AnimalStatus.ADOPTED);
+        verify(notificationClient, times(1))
+                .sendAdoptionNotification(response.id(), response.name(), adoptionRequest.adopterEmail());
+        assertThat(animalService.findById(response.id()).status()).isEqualTo(AnimalStatus.ADOPTED);
     }
 }
