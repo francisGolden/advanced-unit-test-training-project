@@ -3,7 +3,6 @@ package lv.bootcamp.shelter.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lv.bootcamp.shelter.dto.AnimalCreateRequest;
 import lv.bootcamp.shelter.dto.AnimalResponse;
-import lv.bootcamp.shelter.model.Animal;
 import lv.bootcamp.shelter.model.AnimalStatus;
 import lv.bootcamp.shelter.model.AnimalType;
 import lv.bootcamp.shelter.service.AnimalNotFoundException;
@@ -16,8 +15,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDate;
-import java.time.Month;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -112,7 +109,7 @@ class AnimalControllerTest {
     @WithMockUser(roles = "ADMIN")
     void create_shouldReturn400WhenTypeIsNull() throws Exception {
         AnimalCreateRequest animalCreateRequest = new AnimalCreateRequest(
-                "",
+                "Rex",
                 null,
                 "Golden Retriever",
                 3,

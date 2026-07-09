@@ -4,7 +4,6 @@ import lv.bootcamp.shelter.client.NotificationClient;
 import lv.bootcamp.shelter.dto.AdoptionRequest;
 import lv.bootcamp.shelter.dto.AnimalCreateRequest;
 import lv.bootcamp.shelter.dto.AnimalResponse;
-import lv.bootcamp.shelter.model.Animal;
 import lv.bootcamp.shelter.model.AnimalStatus;
 import lv.bootcamp.shelter.model.AnimalType;
 import lv.bootcamp.shelter.service.AnimalService;
@@ -13,12 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
-// TODO: add imports as you write the test (e.g. assertThat, verify)
 
 /**
  * Task: Integration test with @SpringBootTest.
