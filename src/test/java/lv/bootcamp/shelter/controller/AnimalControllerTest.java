@@ -68,12 +68,12 @@ class AnimalControllerTest {
     void create_shouldReturn201WithCreatedAnimal() throws Exception {
         when(animalService.create(any()))
                 .thenReturn(
-                new AnimalResponse(1L, "Rex", AnimalType.DOG, "Siamese", 3, "",
+                new AnimalResponse(1L, "Rex", AnimalType.DOG, "Golden Retriever", 3, "Friendly and energetic",
                         AnimalStatus.AVAILABLE)
         );
 
         AnimalCreateRequest animalCreateRequest = new AnimalCreateRequest(
-                "Bella",
+                "Rex",
                 AnimalType.DOG,
                 "Golden Retriever",
                 3,
