@@ -122,6 +122,6 @@ class AnimalControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(animalCreateRequest)))
-                .andExpect(status().isBadRequest());
+                        .andExpect(status().isBadRequest());
     }
 }
